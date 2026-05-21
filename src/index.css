@@ -1,0 +1,17 @@
+@import 'tailwindcss/base';
+
+@import 'tailwindcss/components';
+
+@import 'tailwindcss/utilities';
+
+.contact-link {
+    user-select: auto !important; /* Allows text selection */
+    pointer-events: auto !important; /* Ensures it's clickable */
+  }
+
+.india-map-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}  

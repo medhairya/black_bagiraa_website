@@ -1,0 +1,81 @@
+/* General container for the entire gallery */
+.infinite-gallery-container {
+  /* Hide any overflow from the scrolling track */
+  overflow: hidden;
+  /* Set a specific height for the gallery viewport */
+  height: 300px; /* Adjust this height as needed */
+  width: 100%;
+  /* Optional: Add some padding or margin if needed */
+  padding: 20px 0;
+  /* Background is transparent by default */
+}
+
+/* The inner track that holds all the images */
+.gallery-track {
+  display: flex;
+  width: max-content; /* Ensure the track is wide enough to hold all slides */
+  height: 100%;
+  /* Apply the infinite-scroll animation */
+  animation: infinite-scroll 40s linear infinite; /* 40s is the duration, adjust as needed */
+}
+
+/* Pause the animation on hover */
+.gallery-track:hover {
+  animation-play-state: paused;
+}
+
+/* Individual slides within the track */
+.gallery-slide {
+  height: 100%;
+  /* Ensure a consistent width for each slide, adjust as needed */
+  width: 400px;
+  /* Add some space between images */
+  margin-right: 20px;
+  /* Add some box shadow for a better look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Optional: Add a rounded border */
+  border-radius: 8px;
+  overflow: hidden; /* Important for the border-radius on images */
+}
+
+.gallery-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures images fill the container without distortion */
+  display: block; /* Removes any extra space below the image */
+}
+
+/* The keyframes for the continuous scrolling animation */
+@keyframes infinite-scroll {
+  0% {
+    /* Start at the beginning */
+    transform: translateX(0%);
+  }
+  100% {
+    /* Translate the track to the left by half its width
+       (since we duplicated the images, this creates a seamless loop) */
+    transform: translateX(-50%);
+  }
+}
+
+/* --- Mobile View Enhancements --- */
+/* Media query for screens smaller than 768px (common breakpoint for tablets/phones) */
+@media (max-width: 768px) {
+  .infinite-gallery-container {
+    /* Make the gallery a bit shorter for mobile devices */
+    height: 200px;
+    padding: 10px 0;
+  }
+
+  .gallery-slide {
+    /* Make each slide smaller to fit more on screen at once */
+    width: 250px;
+    margin-right: 15px;
+    border-radius: 6px;
+  }
+
+  /* Adjust the animation speed for mobile if needed */
+  .gallery-track {
+    animation-duration: 30s; /* A little faster to keep it engaging on mobile */
+  }
+}

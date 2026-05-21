@@ -1,0 +1,110 @@
+/* ProductShowcase.css */
+.product-showcase-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 3D Canvas Styling */
+.three-canvas {
+  background: transparent !important;
+}
+
+/* Loading Animation */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Floating Particles */
+.floating-particle {
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Enhanced Button Hover Effects */
+.nav-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* 3D Model Container */
+.model-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* 3D Canvas Positioning */
+.three-canvas-container {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+/* Ensure 3D models are properly centered */
+.model-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Debug mode styling */
+.debug-mode .three-canvas-container {
+  border: 2px solid rgba(255, 0, 0, 0.3);
+}
+
+/* Model positioning helpers */
+.position-helper {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-showcase-container {
+    height: 100vh;
+  }
+  
+  .nav-button {
+    padding: 0.5rem;
+  }
+  
+  .nav-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+/* Smooth Transitions */
+* {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Glassmorphism Effects */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Enhanced Shadows */
+.enhanced-shadow {
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
