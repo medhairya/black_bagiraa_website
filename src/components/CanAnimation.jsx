@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import canImage from "../assets/can.jpg"; // Make sure your can image is in `src/assets/`
+import canImage from "../assets/can.png"; // Make sure your can image is in `src/assets/`
 
 const CanAnimation = () => {
   return (

@@ -89,9 +89,9 @@
   }
 }
 
-/* Smooth Transitions */
-* {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+/* Smooth Transitions for Interactive Elements */
+.nav-button, .glass-effect, .flavour-cta a, .flavour-cta button, button, a {
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Glassmorphism Effects */

@@ -1,0 +1,32 @@
+.product-experience__grain {
+  pointer-events: none;
+  opacity: 0.18;
+  mix-blend-mode: soft-light;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.18) 0, transparent 28%),
+    radial-gradient(circle at 80% 35%, rgba(255, 255, 255, 0.08) 0, transparent 24%),
+    repeating-linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.05) 0,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 7px
+    );
+}
+
+.product-experience__panel {
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.product-experience__panel--initial {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-experience__panel {
+    transition: none !important;
+  }
+}

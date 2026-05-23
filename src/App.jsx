@@ -4,20 +4,53 @@ import "./App.css";
 import SecretPage from "./components/SecretPage";
 import ProductPage from "./components/ProductPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "@studio-freight/lenis";
 
-
-
+gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const [showLandingPage, setShowLandingPage] = useState(false);
 
   useEffect(() => {
-    // Rotate logo for 2 seconds, then show mist for ~1.5s, then show landing page
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    const updateLenis = (time) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateLenis);
+    gsap.ticker.lagSmoothing(0);
+
     const timer1 = setTimeout(() => {
       setShowLandingPage(true);
     }, 2000);
-    return () => clearTimeout(timer1);
+
+    return () => {
+      clearTimeout(timer1);
+      gsap.ticker.remove(updateLenis);
+      lenis.destroy();
+    };
   }, []);
+
+  useEffect(() => {
+    if (!showLandingPage) {
+      return undefined;
+    }
+
+    const refreshId = requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
+
+    return () => cancelAnimationFrame(refreshId);
+  }, [showLandingPage]);
 
   return (
     <Router>
