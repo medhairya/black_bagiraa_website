@@ -7,6 +7,7 @@ import AnimatedCounter from "./AnimatedCounter";
 import ComingSoon from "./components/ComingSoon";
 import UpcomingProducts from "./UpcomingProducts";
 import ProductExperience from "./components/product-experience/ProductExperience";
+import RotatingProducts from "./components/RotatingProducts";
 
 const StatsSection = () => {
   return (
@@ -24,6 +25,26 @@ const StatsSection = () => {
   );
 };
 
+// YouTube Video Embed Component
+const YouTubeEmbed = ({ videoId }) => {
+  return (
+    <div className="relative w-full flex justify-center my-8">
+      {/* Embedded YouTube Video */}
+      <iframe
+        width="100%"
+        height="400px"  // Reduced height
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&controls=0&iv_load_policy=3`}
+        title="Bagiraa Energy Drink"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className="w-full max-w-screen-xl h-[400px] md:h-[450px] rounded-lg overflow-hidden shadow-lg"
+      ></iframe>
+    </div>
+  );
+};
+
+
 const LandingPage = () => {
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
 
@@ -31,18 +52,26 @@ const LandingPage = () => {
     <div className="relative min-h-screen overflow-x-hidden bg-black text-white">
       <ProductExperience />
 
-      <div className="relative z-10">
-        <StatsSection />
-
-        <div className="border-y border-white/6 bg-gradient-to-b from-[#090909] to-black px-4 py-16 md:py-20">
+      <div className="border-y border-white/6 bg-gradient-to-b from-[#090909] to-black px-4 py-16 md:py-20">
           <div className="mx-auto max-w-6xl">
             <UpcomingProducts />
-          </div>
-        </div>
+                  <YouTubeEmbed videoId="9qIFNp-4b28" /> 
+                  <div className="container mx-auto px-4 py-16">
+        {/* <RotatingProducts /> */}
+      </div>  
+    </div>
 
+        <StatsSection />
         <AutoScrollGallery />
+
+
+
         <MissionVisionHistory />
+
+
+        
         <SocialMediaLinks />
+
 
         <footer
           id="contact-section"

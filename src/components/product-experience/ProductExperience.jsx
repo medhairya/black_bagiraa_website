@@ -1,322 +1,293 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Scene3D from "./Scene3D";
+import HeroScene from "./HeroScene";
 import ScrollNarrative from "./ScrollNarrative";
-import MobileExperience from "./MobileExperience";
-import { productFlavors } from "./flavors";
+import FlavorController from "./FlavorController";
+import CTASection from "./CTASection";
+import { FLAVORS } from "./CanModel";
+import { useResponsive3D } from "./useResponsive3D";
 import "./ProductExperience.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const desktopFlavorProgress = [0.18, 0.46, 0.72];
+const BRAND_STATE = "bagiraa";
 
-const getDesktopStep = (progress) => {
-  if (progress < 0.17) {
-    return 0;
-  }
-  if (progress < 0.39) {
-    return 1;
-  }
-  if (progress < 0.61) {
-    return 2;
-  }
-  if (progress < 0.82) {
-    return 3;
-  }
-  return 4;
-};
+const progressToFlavor = () => BRAND_STATE;
 
-const getDesktopFlavor = (progress) => {
-  if (progress < 0.42) {
-    return 0;
-  }
-  if (progress < 0.68) {
-    return 1;
-  }
-  return 2;
-};
+const ProductExperience = () => {
+  const pinRef = useRef(null);
+  const logoRef = useRef(null);
+  const scrollIndicatorRef = useRef(null);
+  const progressRef = useRef(0);
 
-const DesktopExperience = () => {
-  const sectionRef = useRef(null);
-  const stageRef = useRef(null);
-  const bottleRef = useRef(null);
-  const glowRef = useRef(null);
-  const progressRef = useRef(null);
-  const scrollTriggerRef = useRef(null);
-  const panelRefs = useRef([]);
-  const activeFlavorRef = useRef(0);
-  const activeStepRef = useRef(0);
-  const [activeFlavor, setActiveFlavor] = useState(0);
-  const [activeStep, setActiveStep] = useState(0);
-  const [bottleReady, setBottleReady] = useState(false);
+  const [flavor, setFlavor] = useState(BRAND_STATE);
+  const [uiProgress, setUiProgress] = useState(0);
+  const [ctaVisible, setCtaVisible] = useState(false);
+  const [introVisible, setIntroVisible] = useState(true);
 
-  useLayoutEffect(() => {
-    if (!bottleReady) {
-      return undefined;
-    }
+  const { isMobile } = useResponsive3D();
 
-    const section = sectionRef.current;
-    const stage = stageRef.current;
-    const bottle = bottleRef.current;
-    const glow = glowRef.current;
-    const progress = progressRef.current;
-    const panels = panelRefs.current.filter(Boolean);
-
-    if (
-      !section ||
-      !stage ||
-      !bottle ||
-      !bottle.root ||
-      !bottle.spin ||
-      !glow ||
-      !progress ||
-      panels.length !== 5
-    ) {
+  useEffect(() => {
+    if (!pinRef.current) {
       return undefined;
     }
 
     const ctx = gsap.context(() => {
-      const compactDesktop = window.innerWidth < 1180;
-      const anchorX = compactDesktop ? 0.74 : 1.06;
-      const baseScale = compactDesktop ? 0.84 : 0.9;
+      gsap.fromTo(
+        logoRef.current,
+        { opacity: 0, y: -30, letterSpacing: "0.5em" },
+        {
+          opacity: 1,
+          y: 0,
+          letterSpacing: "0.15em",
+          duration: 1.6,
+          ease: "expo.out",
+          delay: 0.3,
+        }
+      );
 
-      gsap.set(panels, { autoAlpha: 0, yPercent: 14 });
-      gsap.set(panels[0], { autoAlpha: 1, yPercent: 0 });
-      gsap.set(progress, { scaleY: 0, transformOrigin: "top center" });
-      gsap.set(glow, { scale: 0.94, opacity: 0.22 });
-      gsap.set(bottle.root.position, { x: anchorX, y: 0.06, z: 0 });
-      gsap.set(bottle.root.scale, {
-        x: baseScale,
-        y: baseScale,
-        z: baseScale,
-      });
-      gsap.set(bottle.spin.rotation, { x: -0.16, y: -0.96, z: 0.05 });
+      gsap.fromTo(
+        scrollIndicatorRef.current,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 1, ease: "power2.out", delay: 1.8 }
+      );
 
-      const timeline = gsap.timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          id: "bagiraa-story",
-          trigger: section,
-          start: "top top",
-          end: () => `+=${window.innerHeight * 4.8}`,
-          pin: stage,
-          scrub: 1.05,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          fastScrollEnd: true,
-          onUpdate: (self) => {
-            const nextStep = getDesktopStep(self.progress);
-            const nextFlavor = getDesktopFlavor(self.progress);
+      ScrollTrigger.create({
+        trigger: pinRef.current,
+        start: "top top",
+        end: () => `+=${window.innerHeight * 3.5}`,
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          progressRef.current = progress;
+          setUiProgress(progress);
 
-            if (activeStepRef.current !== nextStep) {
-              activeStepRef.current = nextStep;
-              setActiveStep(nextStep);
-            }
+          const nextFlavor = progressToFlavor(progress);
+          setFlavor((currentFlavor) =>
+            currentFlavor === nextFlavor ? currentFlavor : nextFlavor
+          );
 
-            if (activeFlavorRef.current !== nextFlavor) {
-              activeFlavorRef.current = nextFlavor;
-              setActiveFlavor(nextFlavor);
-            }
-          },
+          setIntroVisible(progress < 0.05);
+          setCtaVisible(progress > 0.88);
         },
       });
+    }, pinRef);
 
-      scrollTriggerRef.current = timeline.scrollTrigger;
-
-      timeline
-        .to(progress, { scaleY: 1, duration: 4 }, 0)
-        .to(glow, { scale: 1.16, opacity: 0.34, duration: 4 }, 0)
-        .to(
-          bottle.root.scale,
-          {
-            x: compactDesktop ? 0.92 : 0.99,
-            y: compactDesktop ? 0.92 : 0.99,
-            z: compactDesktop ? 0.92 : 0.99,
-            duration: 0.9,
-          },
-          0
-        )
-        .to(
-          bottle.spin.rotation,
-          { x: -0.08, y: 0.28, z: 0.04, duration: 0.9 },
-          0
-        )
-        .to(panels[0], { autoAlpha: 0, yPercent: -16, duration: 0.3 }, 0.24)
-        .fromTo(
-          panels[1],
-          { autoAlpha: 0, yPercent: 14 },
-          { autoAlpha: 1, yPercent: 0, duration: 0.38 },
-          0.44
-        )
-        .to(
-          bottle.root.scale,
-          {
-            x: compactDesktop ? 0.98 : 1.04,
-            y: compactDesktop ? 0.98 : 1.04,
-            z: compactDesktop ? 0.98 : 1.04,
-            duration: 1,
-          },
-          1
-        )
-        .to(
-          bottle.spin.rotation,
-          { x: 0.04, y: 1.76, z: -0.03, duration: 1 },
-          1
-        )
-        .to(glow, { scale: 1.3, opacity: 0.42, duration: 1 }, 1)
-        .to(panels[1], { autoAlpha: 0, yPercent: -12, duration: 0.28 }, 1.18)
-        .fromTo(
-          panels[2],
-          { autoAlpha: 0, yPercent: 14 },
-          { autoAlpha: 1, yPercent: 0, duration: 0.38 },
-          1.4
-        )
-        .to(
-          bottle.root.scale,
-          {
-            x: compactDesktop ? 0.96 : 1.02,
-            y: compactDesktop ? 0.96 : 1.02,
-            z: compactDesktop ? 0.96 : 1.02,
-            duration: 1,
-          },
-          2
-        )
-        .to(
-          bottle.spin.rotation,
-          { x: -0.02, y: 3.08, z: 0.04, duration: 1 },
-          2
-        )
-        .to(glow, { scale: 1.36, opacity: 0.46, duration: 1 }, 2)
-        .to(panels[2], { autoAlpha: 0, yPercent: -12, duration: 0.28 }, 2.16)
-        .fromTo(
-          panels[3],
-          { autoAlpha: 0, yPercent: 14 },
-          { autoAlpha: 1, yPercent: 0, duration: 0.38 },
-          2.38
-        )
-        .to(
-          bottle.root.scale,
-          {
-            x: compactDesktop ? 0.88 : 0.94,
-            y: compactDesktop ? 0.88 : 0.94,
-            z: compactDesktop ? 0.88 : 0.94,
-            duration: 0.92,
-          },
-          3
-        )
-        .to(
-          bottle.spin.rotation,
-          { x: -0.1, y: 4.26, z: 0.02, duration: 0.92 },
-          3
-        )
-        .to(glow, { scale: 1.06, opacity: 0.26, duration: 0.92 }, 3)
-        .to(panels[3], { autoAlpha: 0, yPercent: -10, duration: 0.26 }, 3.16)
-        .fromTo(
-          panels[4],
-          { autoAlpha: 0, yPercent: 14 },
-          { autoAlpha: 1, yPercent: 0, duration: 0.42 },
-          3.34
-        );
-    }, section);
-
-    const refreshId = requestAnimationFrame(() => {
-      ScrollTrigger.refresh();
-    });
+    const refreshId = requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
       cancelAnimationFrame(refreshId);
-      scrollTriggerRef.current = null;
       ctx.revert();
-    };
-  }, [bottleReady]);
-
-  const activeTheme = productFlavors[activeFlavor] ?? productFlavors[0];
-
-  const scrollToFlavor = (index) => {
-    const trigger = scrollTriggerRef.current;
-    if (!trigger) {
-      return;
-    }
-
-    const scrollTop =
-      trigger.start + desktopFlavorProgress[index] * (trigger.end - trigger.start);
-    window.scrollTo({ top: scrollTop, behavior: "smooth" });
-  };
-
-  return (
-    <section
-      ref={sectionRef}
-      className="relative hidden bg-black md:block"
-      style={{
-        backgroundImage: `radial-gradient(circle at 74% 28%, ${activeTheme.accent}1f, transparent 28%), linear-gradient(180deg, #020202 0%, ${activeTheme.surface} 58%, #000000 100%)`,
-      }}
-    >
-      <div ref={stageRef} className="relative min-h-screen overflow-hidden">
-        <div className="product-experience__grain absolute inset-0" />
-        <div
-          ref={glowRef}
-          className="absolute left-[68%] top-1/2 z-10 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px]"
-          style={{
-            background: `radial-gradient(circle, ${activeTheme.accent}55 0%, ${activeTheme.accentSoft}22 48%, transparent 72%)`,
-          }}
-        />
-
-        <Scene3D
-          activeFlavor={activeFlavor}
-          bottleRef={bottleRef}
-          onBottleReady={() => setBottleReady(true)}
-        />
-
-        <div className="absolute inset-0 z-20">
-          <ScrollNarrative
-            flavors={productFlavors}
-            activeFlavor={activeFlavor}
-            activeStep={activeStep}
-            progressRef={progressRef}
-            registerPanel={(index, node) => {
-              panelRefs.current[index] = node;
-            }}
-            onSelectFlavor={scrollToFlavor}
-          />
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const ProductExperience = () => {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window === "undefined" ? false : window.innerWidth < 768
-  );
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 767px)");
-    const updateViewport = (event) => {
-      setIsMobile(event.matches);
-    };
-
-    setIsMobile(media.matches);
-    if (media.addEventListener) {
-      media.addEventListener("change", updateViewport);
-    } else {
-      media.addListener(updateViewport);
-    }
-
-    return () => {
-      if (media.removeEventListener) {
-        media.removeEventListener("change", updateViewport);
-      } else {
-        media.removeListener(updateViewport);
-      }
     };
   }, []);
 
-  if (isMobile) {
-    return <MobileExperience flavors={productFlavors} />;
-  }
+  const handleFlavorChange = useCallback((nextFlavor) => {
+    setFlavor(nextFlavor);
+  }, []);
 
-  return <DesktopExperience />;
+  const flavorData = FLAVORS[flavor] ?? FLAVORS.bagiraa;
+
+  return (
+    <section
+      ref={pinRef}
+      className="hero-section"
+      style={{ height: "100vh" }}
+      aria-label="Black Bagiraa product experience"
+    >
+      <div className="noise-overlay" aria-hidden="true" />
+
+      <div
+        className="absolute inset-0 transition-all duration-1000"
+        style={{
+          background: `radial-gradient(ellipse 70% 60% at 50% 40%, ${flavorData.labelTop}cc 0%, #050505 70%)`,
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="canvas-wrapper">
+        <HeroScene flavor={flavor} progress={progressRef} />
+      </div>
+
+      <div className="ui-overlay">
+        <div
+          className={`absolute left-0 right-0 top-0 z-30 flex items-center justify-between pointer-events-none ${
+            isMobile ? "px-5 pt-6" : "px-10 pt-8"
+          }`}
+        >
+          <div ref={logoRef} style={{ opacity: 0 }}>
+            <p
+              className="font-display tracking-widest"
+              style={{
+                fontSize: isMobile ? "1.3rem" : "1.6rem",
+                color: "#F0EDE6",
+                letterSpacing: "0.15em",
+                lineHeight: 1,
+              }}
+            >
+              BLACK BAGIRAA
+            </p>
+            <div
+              className="mt-1 h-px"
+              style={{
+                background: `linear-gradient(90deg, ${flavorData.primary}, transparent)`,
+                width: "100%",
+                transition: "background 1.2s ease",
+              }}
+            />
+          </div>
+
+          {!isMobile && (
+            <nav className="flex items-center gap-8" style={{ pointerEvents: "all" }}>
+              {["Story", "Energy", "Find Us"].map((item) => (
+                <a
+                  key={item}
+                  href={item === "Find Us" ? "#contact-section" : "#"}
+                  className="text-sm tracking-widest transition-colors duration-300"
+                  style={{
+                    color: "rgba(240,237,230,0.45)",
+                    letterSpacing: "0.15em",
+                    fontSize: "0.75rem",
+                    fontWeight: 400,
+                  }}
+                  onMouseEnter={(event) => {
+                    event.currentTarget.style.color = flavorData.primary;
+                  }}
+                  onMouseLeave={(event) => {
+                    event.currentTarget.style.color = "rgba(240,237,230,0.45)";
+                  }}
+                >
+                  {item.toUpperCase()}
+                </a>
+              ))}
+            </nav>
+          )}
+        </div>
+
+        <div
+          className={`absolute inset-0 z-10 flex flex-col items-center justify-center transition-opacity duration-700 ${
+            introVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          aria-hidden={!introVisible}
+        >
+          <p
+            className="mb-4 uppercase tracking-widest"
+            style={{
+              fontSize: isMobile ? "0.65rem" : "0.75rem",
+              color: flavorData.primary,
+              letterSpacing: "0.35em",
+              transition: "color 1.2s ease",
+            }}
+          >
+            Premium Energy Drink
+          </p>
+
+          <h1
+            className="font-display text-center leading-none"
+            style={{
+              fontSize: isMobile
+                ? "clamp(3.5rem, 16vw, 7rem)"
+                : "clamp(5rem, 10vw, 11rem)",
+              color: "#F0EDE6",
+              letterSpacing: "0.06em",
+              pointerEvents: "none",
+              userSelect: "none",
+            }}
+          >
+            BLACK
+            <br />
+            <span
+              style={{
+                color: flavorData.primary,
+                filter: `drop-shadow(0 0 30px ${flavorData.primary}80)`,
+                transition: "color 1.2s ease, filter 1.2s ease",
+              }}
+            >
+              BAGIRAA
+            </span>
+          </h1>
+
+          <div
+            ref={scrollIndicatorRef}
+            className="scroll-indicator absolute bottom-10 flex flex-col items-center gap-2"
+            style={{ opacity: 0 }}
+          >
+            <p
+              style={{
+                fontSize: "0.6rem",
+                letterSpacing: "0.3em",
+                color: "rgba(240,237,230,0.35)",
+              }}
+            >
+              SCROLL TO EXPLORE
+            </p>
+            <svg width="20" height="30" viewBox="0 0 20 30" fill="none" aria-hidden="true">
+              <rect x="8" y="6" width="4" height="8" rx="2" fill={flavorData.primary} opacity="0.8" />
+              <rect x="1" y="1" width="18" height="28" rx="9" stroke="rgba(240,237,230,0.2)" strokeWidth="1.5" />
+            </svg>
+          </div>
+        </div>
+
+        <div
+          className={`transition-opacity duration-700 ${
+            introVisible ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <ScrollNarrative
+            progress={uiProgress}
+            currentFlavor={flavor}
+            isMobile={isMobile}
+          />
+        </div>
+
+        <div
+          className={`absolute z-30 ${isMobile ? "right-5 top-6" : "right-10 top-8"}`}
+          style={{ pointerEvents: "all" }}
+        >
+          <FlavorController
+            currentFlavor={flavor}
+            onFlavorChange={handleFlavorChange}
+          />
+        </div>
+
+        <CTASection
+          visible={ctaVisible}
+          currentFlavor={flavor}
+          isMobile={isMobile}
+        />
+
+        {!isMobile && (
+          <div className="pointer-events-none absolute bottom-6 left-10 z-30 flex items-center gap-3">
+            <div className="h-px w-8" style={{ background: "rgba(240,237,230,0.15)" }} />
+            <p
+              style={{
+                fontSize: "0.65rem",
+                letterSpacing: "0.2em",
+                color: "rgba(240,237,230,0.25)",
+              }}
+            >
+              www.blackbagiraa.com
+            </p>
+          </div>
+        )}
+
+        <div
+          className="absolute left-0 top-0 z-50 h-px transition-all duration-100"
+          style={{
+            width: `${uiProgress * 100}%`,
+            background: `linear-gradient(90deg, ${flavorData.primary}, ${
+              flavorData.accent1 || flavorData.primary
+            })`,
+            boxShadow: `0 0 8px ${flavorData.primary}`,
+            transition: "background 1.2s ease",
+          }}
+        />
+      </div>
+    </section>
+  );
 };
 
 export default ProductExperience;
